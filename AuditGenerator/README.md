@@ -40,15 +40,63 @@ El script crea triggers que registran cada cambio (INSERT, UPDATE, DELETE) en la
 
 ## 🚀 Instalación
 
-1. **Guardar el script**  
-   Descarga o guarda el archivo `generadorfunctionencript.py` en una carpeta de tu equipo.
+## 📋 Requisitos Previos
+- Python 3.8 o superior
+- PostgreSQL 12 o superior
+- Node.js y npm instalados (para la interfaz gráfica)
+- Librerías necesarias incluidas en `requirements.txt`
 
-2. **Crear `requirements.txt`**  
-   En la misma carpeta crea un archivo `requirements.txt` con este contenido:
+---
 
-   ```text
-   psycopg2-binary==2.9.9
-   ```
-3. **Instalar las dependencias**
-   Abre una terminal en esa carpeta y ejecuta:
-   
+## ⚙️ Instalación de Dependencias
+Abre una terminal en el directorio del proyecto y ejecuta:
+```bash
+pip install -r requirements.txt
+npm install
+```
+
+---
+
+## 🚀 Ejecución
+Para iniciar la interfaz gráfica:
+```bash
+npm start
+```
+
+---
+
+# 📖 Guía de Uso
+
+El proceso debe seguirse en orden para garantizar una configuración correcta.
+
+## Paso 1: Conectar a la Base de Datos
+- Rellena los datos de conexión (**Host, Puerto, Base de Datos, Usuario, Contraseña y Schema**).  
+- Haz clic en **"Conectar"**.  
+- Si la conexión es exitosa, el estado cambiará a **"Conectado"**.
+
+## Paso 2: Configurar la Encriptación
+- Selecciona el **Tipo de Encriptación** que deseas.  
+- Introduce una **Clave Secreta** segura (mínimo 8 caracteres) y confírmala.  
+- El indicador de estado confirmará que las claves coinciden y son válidas.
+
+## Paso 3: Crear las Funciones Base
+- Con la conexión activa y la clave válida, haz clic en **"Crear Funciones Base"**.  
+- Esto instalará en tu base de datos toda la lógica de encriptación, ofuscación y auditoría.
+
+## Paso 4: Generar la Auditoría
+- La lista de tablas del esquema se cargará automáticamente.  
+- Selecciona las tablas que deseas auditar marcando las casillas correspondientes.  
+- Haz clic en **"Generar Auditoría"**.  
+- El script creará las tablas de auditoría ofuscadas y los triggers para cada tabla seleccionada.
+
+## Paso 5: Guardar la Configuración (¡CRÍTICO!)
+- Haz clic en **"Guardar Configuración de Encriptación"**.  
+- Esto creará el archivo **configuracion_encriptacion.txt** en la misma carpeta.  
+- Guarda este archivo en un lugar extremadamente seguro.
+
+---
+
+## ⚠️ ¡MUY IMPORTANTE!
+- La seguridad de tu auditoría depende de la **Clave Secreta**.  
+- Si pierdes la clave secreta, **tus datos de auditoría encriptados serán permanentemente irrecuperables**.  
+- Trata el archivo **configuracion_encriptacion.txt** como un documento confidencial.
