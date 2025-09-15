@@ -51,3 +51,5 @@ Asegúrate de tener lo siguiente instalado y en ejecución:
    docker==7.1.0
    mysql-connector-python==9.4.0
    psycopg2-binary==2.9.9
+   ```
+⚠️ **Nota:**
