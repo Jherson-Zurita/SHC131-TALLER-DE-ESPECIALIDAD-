@@ -40,63 +40,124 @@ El script crea triggers que registran cada cambio (INSERT, UPDATE, DELETE) en la
 
 ## 🚀 Instalación
 
-## 📋 Requisitos Previos
-- Python 3.8 o superior
-- PostgreSQL 12 o superior
-- Node.js y npm instalados (para la interfaz gráfica)
-- Librerías necesarias incluidas en `requirements.txt`
+1. **Guardar el script**  
+   Descarga o guarda el archivo `generadorfunctionencript.py` en una carpeta de tu equipo.
+
+2. **Crear `requirements.txt`**  
+   En la misma carpeta crea un archivo `requirements.txt` con este contenido:
+
+   ```text
+   psycopg2-binary==2.9.9
+   ```
+3. **Instalar las dependencias**
+   Abre una terminal en esa carpeta y ejecuta:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Ejecutar la aplicación**
+   ```bash
+   python generadorfunctionencript.py
+    ```
+   
+## 📖 Guía de Uso (paso a paso)
+
+Sigue el orden indicado para asegurar que todo quede correctamente instalado y funcional.
 
 ---
 
-## ⚙️ Instalación de Dependencias
-Abre una terminal en el directorio del proyecto y ejecuta:
-```bash
-pip install -r requirements.txt
-npm install
-```
+### 🧩 Paso 1 — Conectar a la Base de Datos
+
+- Rellena los datos de conexión: **Host**, **Puerto**, **Base de Datos**, **Usuario**, **Contraseña** y **Schema**.
+- Haz clic en **"Conectar"**.
+- Si la conexión es correcta, el estado cambiará a **"Conectado"**.
 
 ---
 
-## 🚀 Ejecución
-Para iniciar la interfaz gráfica:
-```bash
-npm start
-```
+### 🔐 Paso 2 — Configurar la Encriptación
+
+- Selecciona el **Tipo de Encriptación** (`AES`, `SHA-256`, etc.) desde el menú.
+- Introduce una **Clave Secreta segura** (mínimo 8 caracteres) y confírmala.
+- Verifica que el indicador de estado confirme que las claves **coinciden** y que son **válidas**.
 
 ---
 
-# 📖 Guía de Uso
+### 🛠️ Paso 3 — Crear las Funciones Base
 
-El proceso debe seguirse en orden para garantizar una configuración correcta.
+Con la conexión activa y la clave validada, haz clic en **"Crear Funciones Base"**. Esto:
 
-## Paso 1: Conectar a la Base de Datos
-- Rellena los datos de conexión (**Host, Puerto, Base de Datos, Usuario, Contraseña y Schema**).  
-- Haz clic en **"Conectar"**.  
-- Si la conexión es exitosa, el estado cambiará a **"Conectado"**.
+- Instalará `pgcrypto` si falta:  
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS pgcrypto;
+  ```
+  - Creará funciones auxiliares como:  
+  - `encrypt_field(text, key)`  
+  - `decrypt_field(bytea, key)`  
+  - `hash_name(text)`  
+  - `Lógica de ofuscación` 
 
-## Paso 2: Configurar la Encriptación
-- Selecciona el **Tipo de Encriptación** que deseas.  
-- Introduce una **Clave Secreta** segura (mínimo 8 caracteres) y confírmala.  
-- El indicador de estado confirmará que las claves coinciden y son válidas.
-
-## Paso 3: Crear las Funciones Base
-- Con la conexión activa y la clave válida, haz clic en **"Crear Funciones Base"**.  
-- Esto instalará en tu base de datos toda la lógica de encriptación, ofuscación y auditoría.
-
-## Paso 4: Generar la Auditoría
-- La lista de tablas del esquema se cargará automáticamente.  
-- Selecciona las tablas que deseas auditar marcando las casillas correspondientes.  
-- Haz clic en **"Generar Auditoría"**.  
-- El script creará las tablas de auditoría ofuscadas y los triggers para cada tabla seleccionada.
-
-## Paso 5: Guardar la Configuración (¡CRÍTICO!)
-- Haz clic en **"Guardar Configuración de Encriptación"**.  
-- Esto creará el archivo **configuracion_encriptacion.txt** en la misma carpeta.  
-- Guarda este archivo en un lugar extremadamente seguro.
+- Generará utilidades para nombres ofuscados de tablas/columnas (ej. SHA-256 truncado).
 
 ---
 
-## ⚠️ ¡MUY IMPORTANTE!
-- La seguridad de tu auditoría depende de la **Clave Secreta**.  
-- Si pierdes la clave secreta, **tus datos de auditoría encriptados serán permanentemente irrecuperables**.  
-- Trata el archivo **configuracion_encriptacion.txt** como un documento confidencial.
+### 📊 Paso 4 — Generar la Auditoría
+
+- La lista de tablas del esquema se cargará automáticamente en la interfaz.
+- Marca las casillas de las tablas que deseas auditar.
+- Haz clic en **"Generar Auditoría"**.
+
+Para cada tabla seleccionada, el script:
+
+- Generará un nombre de tabla de auditoría ofuscado (ej. `aud_<hash>`).
+- Creará la tabla de auditoría con columnas ofuscadas y campos clave:
+  - `fecha`, `operacion`, `usuario`, `datos_old`, `datos_new`
+- Creará la función trigger que:
+  - Captura `OLD` y `NEW` según la operación
+  - Serializa los datos en JSON
+  - Encripta los campos con la clave y algoritmo seleccionado
+  - Inserta el registro en la tabla de auditoría
+- Creará el `CREATE TRIGGER` que asocia la función a la tabla original (`AFTER INSERT/UPDATE/DELETE`).
+
+---
+
+### 🔎 Paso 5 — Desencriptación y Consultas
+
+- La interfaz puede generar un query `SELECT` que, usando la **Clave Secreta**, desencripta los valores para su lectura.
+- Estas consultas deben ejecutarse con la clave correcta.  
+  Si la clave no coincide, la desencriptación fallará y los datos seguirán siendo ininteligibles.
+
+---
+
+### 💾 Paso 6 — Guardar la Configuración (¡CRÍTICO!)
+
+Haz clic en **"Guardar Configuración de Encriptación"**.  
+Se generará un archivo `configuracion_encriptacion.txt` que contiene:
+
+- Algoritmo seleccionado  
+- Fecha de creación  
+- Hashable mapping (`tabla original -> tabla de auditoría ofuscada`)
+
+> ⚠️ **Nota:** NO almacenes la clave en texto plano si no lo deseas.  
+> Si decides guardarla, hazlo en un contenedor cifrado o gestor de secretos.
+
+Guarda ese archivo en un lugar **extremadamente seguro**:  
+Es la **llave maestra** para recuperar los datos de auditoría.
+
+---
+
+## ⚠️ Advertencias Críticas
+
+- Si pierdes la clave secreta, los datos encriptados serán **irrecuperables**.
+- Trata `configuracion_encriptacion.txt` como evidencia sensible y protégela con controles de acceso físico y/o digital.
+- Antes de ejecutar en producción, **prueba el flujo completo** en un entorno de staging.
+- Otorga **sólo los permisos mínimos necesarios** al usuario que ejecutará la creación de funciones/triggers.
+- Documenta y controla los accesos a la clave.  
+  Considera usar un gestor de secretos como **Vault**, **AWS Secrets Manager**, etc.
+
+---
+
+## 📄 Licencia y Responsabilidad
+
+Este script se entrega **tal cual**.  
+Revisa y audita el código antes de usarlo en entornos críticos.
+
+> 🛡️ El autor no asume responsabilidad por pérdidas derivadas de un mal uso, pérdida de claves o mala configuración.
